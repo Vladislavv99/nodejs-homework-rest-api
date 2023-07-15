@@ -14,7 +14,7 @@ contactsRouter.get("/:contactId", contactsControllers.getContactById);
 
 contactsRouter.post(
   "/",
-  validateBody(contactsSchemas),
+  validateBody(contactsSchemas.contactAddSchema),
   contactsControllers.addContact
 );
 
@@ -22,7 +22,7 @@ contactsRouter.delete("/:contactId", contactsControllers.removeContact);
 
 contactsRouter.put(
   "/:contactId",
-  validateBody(contactsSchemas),
+  validateBody(contactsSchemas.contactAddSchema),
   contactsControllers.updateContact
 );
 
