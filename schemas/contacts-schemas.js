@@ -13,8 +13,14 @@ const contactAddSchema = Joi.object({
     "any.required": `"phone" must be exist`,
     "string.empty": `"phone" must be filled`,
   }),
+  favorite: Joi.boolean(),
+});
+
+const contactUpdateFavoriteSchema = Joi.object({
+  favorite: Joi.boolean().required(),
 });
 
 export default {
   contactAddSchema,
+  contactUpdateFavoriteSchema,
 };
