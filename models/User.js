@@ -23,7 +23,10 @@ const userSchema = new Schema(
   { versionKey: false, timestamps: true }
 );
 
+userSchema.pre("findOneAndUpdate", allowUptateValidate);
+
 userSchema.post("save", handleSaveError);
+userSchema.post("findOneAndUpdate", handleSaveError);
 
 const User = model("user", userSchema);
 export default User;
