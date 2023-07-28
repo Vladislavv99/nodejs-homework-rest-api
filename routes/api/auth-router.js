@@ -6,6 +6,8 @@ import { validateBody } from "../../decorators/index.js";
 
 import usersSchemas from "../../schemas/users-schemas.js";
 
+import { authenticate } from "../../middlewares/index.js";
+
 const authRouter = express.Router();
 
 authRouter.post(
@@ -19,5 +21,9 @@ authRouter.post(
   validateBody(usersSchemas.userSingInSchema),
   authControllers.singin
 );
+
+authRouter.get("/current", authenticate, authControllers.getCurrent);
+
+authRouter.post("/logout", authenticate, authControllers.logout);
 
 export default authRouter;
