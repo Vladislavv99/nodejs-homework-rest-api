@@ -1,6 +1,10 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv/config";
+import fs from "fs/promises";
+import path from "path";
+import gravatar from "gravatar";
+import jimp from "jimp";
 
 import { HttpError } from "../helpers/index.js";
 
@@ -10,8 +14,16 @@ import { ctrlWrapper } from "../decorators/index.js";
 
 const { JWT_SECRET } = process.env;
 
+const avatarDir = path.resolve("public", "avatars");
+
 const singup = async (req, res) => {
   const { email, password } = req.body;
+  ////////////////////////////////////////////////////////
+
+  const avatarURL = gravatar.url(email, { s: "250" });
+
+  ////////////////////////////////////////////////////////
+
   const user = await User.findOne({ email });
   if (user) {
     throw HttpError(409, "Email is use");
@@ -19,7 +31,11 @@ const singup = async (req, res) => {
 
   const hashPassword = await bcrypt.hash(password, 10);
 
-  const newUser = await User.create({ ...req.body, password: hashPassword });
+  const newUser = await User.create({
+    ...req.body,
+    avatarURL,
+    password: hashPassword,
+  });
 
   res.status(201).json({
     user: {
@@ -72,9 +88,31 @@ const logout = async (req, res) => {
   res.status(204);
 };
 
+const changeAvatar = async (req, res) => {
+  const { _id } = req.user;
+  /////////////////////////////////////////////////////
+
+  const { path: tempUpload, originalname } = req.file;
+  const filename = `${_id}_${originalname}`;
+  const resultUpload = path.join(avatarDir, filename);
+
+  const image = await jimp.read(tempUpload);
+  await image.resize(250, 250);
+  await image.writeAsync(tempUpload);
+
+  await fs.rename(tempUpload, resultUpload);
+  const avatarURL = path.join("avatars", filename);
+
+  /////////////////////////////////////////////////////
+
+  await User.findByIdAndUpdate(_id, { avatarURL });
+  res.status(200).json({ avatarURL });
+};
+
 export default {
   singup: ctrlWrapper(singup),
   singin: ctrlWrapper(singin),
   getCurrent: ctrlWrapper(getCurrent),
   logout: ctrlWrapper(logout),
+  changeAvatar: ctrlWrapper(changeAvatar),
 };
